@@ -72,6 +72,7 @@ To benefit from these attributes, you will need to download the **`FmgLib.Orm.Co
 
 Let's take an example code:
 ```csharp
+using FmgLib.Develop;
 using FmgLib.Orm.DbHelper;
 using FmgLib.Orm.DbHelper.SQLite;
 using FmgLib.TestWeb.Models;
@@ -81,41 +82,159 @@ namespace FmgLib.TestWeb.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly IDbCenter _dbCenter;
-
-        public HomeController(IDbCenter dbCenter)
+        public HomeController()
         {
-            _dbCenter = dbCenter;
         }
 
         public IActionResult Index()
         {
-            var queryGenerate = new SqlQueryGenerate();
             List<Product> products = new List<Product>();
-            for (int i = 1; i <= 100; i++)
+            for (int i = 1; i <= 50; i++)
             {
-                var product = new Product
+                var item = new Product
                 {
                     ProductName = $"Deneme Test {i * 4}",
                     Price = i * 8,
                     CategoryId = i,
                 };
 
-                products.Add(product);
+                products.Add(item);
             }
 
-            var sqliteinsert = queryGenerate.SqlInsertRange(products); // Insert Range Operation
-            var resultInsertSS = _dbCenter.SendQuery<Product, int>(sqliteinsert); // Send SQL Query
+            var query = Query.GetQuery<Product>()
+                .Where(x => x.Price > 250 && x.ProductName.Contains("Dene"))
+                .DistinctBy(x => x.Price)
+                .DistinctBy(x => x.ProductName)
+                .OrderByDescending(x => x.Price);
 
-            var queryString = queryGenerate.GetQuery<Product>(x => x.Price >= 200, x => x.Price, Orm.Common.OrderedType.Desc);
-            var result = _dbCenter.SendQuery<Product, List<Product>>(queryString);
+            #region SQLite Queries
+
+            #region Sync
+
+            var qqqq = query.AsQuerySQLite().First();
+            var wwww = query.AsQuerySQLite().First(x => x.Id > 10);
+            var eeee = query.AsQuerySQLite().FirstOrDefault();
+            var rrrr = query.AsQuerySQLite().FirstOrDefault(x => x.Id > 10);
+            var tttt = query.AsQuerySQLite().ElementAt(5);
+            var yyyy = query.AsQuerySQLite().ElementAtOrDefault(5);
+            var uuuu = query.AsQuerySQLite().Min(x => x.Price);
+            var cccc = query.AsQuerySQLite().MinBy(x => x.Price);
+            var oooo = query.AsQuerySQLite().Max(x => x.Price);
+            var pppp = query.AsQuerySQLite().MaxBy(x => x.Price);
+            var llll = query.AsQuerySQLite().Sum(x => x.Price);
+            var zzzz = query.AsQuerySQLite().Average(x => x.Price);
+            var aaaa = query.AsQuerySQLite().Count();
+            var ssss = query.AsQuerySQLite().Count(x => x.Price < 600);
+            var dddd = query.AsQuerySQLite().Any();
+            var ffff = query.AsQuerySQLite().Any(x => x.Price < 600);
+            var gggg = query.AsQuerySQLite().Skip(20);
+            var hhhh = query.AsQuerySQLite().Take(20);
+            var xxxx = query.AsQuerySQLite().SkipAndTake(10, 20);
+            var kkkk = query.AsQuerySQLite().ToList();
+
+            #endregion
+
+            #region Async
+
+            var qqqq0 = await query.AsQuerySQLite().FirstAsync();
+            var wwww0 = await query.AsQuerySQLite().FirstAsync(x => x.Id > 10);
+            var eeee0 = await query.AsQuerySQLite().FirstOrDefaultAsync();
+            var rrrr0 = await query.AsQuerySQLite().FirstOrDefaultAsync(x => x.Id > 10);
+            var tttt0 = await query.AsQuerySQLite().ElementAtAsync(5);
+            var yyyy0 = await query.AsQuerySQLite().ElementAtOrDefaultAsync(5);
+            var uuuu0 = await query.AsQuerySQLite().MinAsync(x => x.Price);
+            var cccc0 = await query.AsQuerySQLite().MinByAsync(x => x.Price);
+            var oooo0 = await query.AsQuerySQLite().MaxAsync(x => x.Price);
+            var pppp0 = await query.AsQuerySQLite().MaxByAsync(x => x.Price);
+            var llll0 = await query.AsQuerySQLite().SumAsync(x => x.Price);
+            var zzzz0 = await query.AsQuerySQLite().AverageAsync(x => x.Price);
+            var aaaa0 = await query.AsQuerySQLite().CountAsync();
+            var ssss0 = await query.AsQuerySQLite().CountAsync(x => x.Price < 600);
+            var dddd0 = await query.AsQuerySQLite().AnyAsync();
+            var ffff0 = await query.AsQuerySQLite().AnyAsync(x => x.Price < 600);
+            var gggg0 = await query.AsQuerySQLite().SkipAsync(20);
+            var hhhh0 = await query.AsQuerySQLite().TakeAsync(20);
+            var xxxx0 = await query.AsQuerySQLite().SkipAndTakeAsync(10, 20);
+            var kkkk0 = await query.AsQuerySQLite().ToListAsync();
+
+            #endregion
+
+            #endregion
+
+            #region SQLite Commands
+
+            #region Sync
+
+            var insertr = Command
+                .Insert(new Product
+                {
+                    ProductName = "One item insert test",
+                    Price = 1234,
+                    CategoryId = 234
+                })
+                .AsCommandSQLite()
+                .Save();
+
+            var insertrMulti = Command
+                .InsertRange(products)
+                .AsCommandSQLite()
+                .Save();
+
+            var updater = Command
+                .Update(new Product
+                {
+                    ProductName = "222 TEST DENEME 22",
+                    Price = 6134,
+                    CategoryId = 155
+                }, x => x.Id == 102)
+                .AsCommandSQLite()
+                .Save();
+
+            var deleter = Command
+                .Delete<Product>(x => x.Id == 102)
+                .AsCommandSQLite()
+                .Save();
+
+            #endregion
+
+            #region Async
+
+            var insertr0 = await Command
+                .Insert(new Product
+                {
+                    ProductName = "One item insert test",
+                    Price = 1234,
+                    CategoryId = 234
+                })
+                .AsCommandSQLite()
+                .SaveAsync();
+
+            var insertrMulti0 = await Command
+                .InsertRange(products)
+                .AsCommandSQLite()
+                .SaveAsync();
+
+            var updater0 = await Command
+                .Update(new Product
+                {
+                    ProductName = "222 TEST DENEME 22",
+                    Price = 6134,
+                    CategoryId = 155
+                }, x => x.Id == 102)
+                .AsCommandSQLite()
+                .SaveAsync();
+
+            var deleter0 = await Command
+                .Delete<Product>(x => x.Id == 102)
+                .AsCommandSQLite()
+                .SaveAsync();
+
+            #endregion
+
+            #endregion
+
             return View();
         }
     }
 }
 ```
-In this code, methods to generate SQL are provided to us via the 'queryGenerate' object. `SqlInsertRange` function takes List as parameter. As a result, the SQL query is returned.
-
-`GetQuery<TEntity>` method helps for listing. As the first parameter, you can write your **WHERE** condition with a lambda expression. As the second parameter, the **Order** operation, that is, the sorting criterion, is determined (lambda is selected with an expression.) and **ASC** is handled by default. If you want to perform the reverse operation, you can give `OrderedType` as the third parameter.
-#
-**All written SQL queries are sent to the database with the `SendQuery<TEntity, TResult>(string query)` method of the `_dbCenter` object. `TEntity` here represents the Model to be processed and `TResult` represents the value to be returned.**
