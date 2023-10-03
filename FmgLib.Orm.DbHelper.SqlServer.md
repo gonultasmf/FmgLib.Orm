@@ -72,6 +72,7 @@ To benefit from these attributes, you will need to download the **`FmgLib.Orm.Co
 
 Let's take an example code:
 ```csharp
+using FmgLib.Develop;
 using FmgLib.Orm.DbHelper;
 using FmgLib.Orm.DbHelper.SqlServer;
 using FmgLib.TestWeb.Models;
@@ -81,41 +82,159 @@ namespace FmgLib.TestWeb.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly IDbCenter _dbCenter;
-
-        public HomeController(IDbCenter dbCenter)
+        public HomeController()
         {
-            _dbCenter = dbCenter;
         }
 
         public IActionResult Index()
         {
-            var queryGenerate = new SqlQueryGenerate();
             List<Product> products = new List<Product>();
-            for (int i = 1; i <= 100; i++)
+            for (int i = 1; i <= 50; i++)
             {
-                var product = new Product
+                var item = new Product
                 {
                     ProductName = $"Deneme Test {i * 4}",
                     Price = i * 8,
                     CategoryId = i,
                 };
 
-                products.Add(product);
+                products.Add(item);
             }
 
-            var sqlserverinsert = queryGenerate.SqlInsertRange(products); // Insert Range Operation
-            var resultInsertSS = _dbCenter.SendQuery<Product, int>(sqlserverinsert); // Send SQL Query
+            var query = Query.GetQuery<Product>()
+                .Where(x => x.Price > 250 && x.ProductName.Contains("Dene"))
+                .DistinctBy(x => x.Price)
+                .DistinctBy(x => x.ProductName)
+                .OrderByDescending(x => x.Price);
 
-            var queryString = queryGenerate.GetQuery<Product>(x => x.Price >= 200, x => x.Price, Orm.Common.OrderedType.Desc);
-            var result = _dbCenter.SendQuery<Product, List<Product>>(queryString);
+            #region SqlServer Queries
+
+            #region Sync
+
+            var qqqq = query.AsQuerySqlServer().First();
+            var wwww = query.AsQuerySqlServer().First(x => x.Id > 10);
+            var eeee = query.AsQuerySqlServer().FirstOrDefault();
+            var rrrr = query.AsQuerySqlServer().FirstOrDefault(x => x.Id > 10);
+            var tttt = query.AsQuerySqlServer().ElementAt(5);
+            var yyyy = query.AsQuerySqlServer().ElementAtOrDefault(5);
+            var uuuu = query.AsQuerySqlServer().Min(x => x.Price);
+            var cccc = query.AsQuerySqlServer().MinBy(x => x.Price);
+            var oooo = query.AsQuerySqlServer().Max(x => x.Price);
+            var pppp = query.AsQuerySqlServer().MaxBy(x => x.Price);
+            var llll = query.AsQuerySqlServer().Sum(x => x.Price);
+            var zzzz = query.AsQuerySqlServer().Average(x => x.Price);
+            var aaaa = query.AsQuerySqlServer().Count();
+            var ssss = query.AsQuerySqlServer().Count(x => x.Price < 600);
+            var dddd = query.AsQuerySqlServer().Any();
+            var ffff = query.AsQuerySqlServer().Any(x => x.Price < 600);
+            var gggg = query.AsQuerySqlServer().Skip(20);
+            var hhhh = query.AsQuerySqlServer().Take(20);
+            var xxxx = query.AsQuerySqlServer().SkipAndTake(10, 20);
+            var kkkk = query.AsQuerySqlServer().ToList();
+
+            #endregion
+
+            #region Async
+
+            var qqqq0 = await query.AsQuerySqlServer().FirstAsync();
+            var wwww0 = await query.AsQuerySqlServer().FirstAsync(x => x.Id > 10);
+            var eeee0 = await query.AsQuerySqlServer().FirstOrDefaultAsync();
+            var rrrr0 = await query.AsQuerySqlServer().FirstOrDefaultAsync(x => x.Id > 10);
+            var tttt0 = await query.AsQuerySqlServer().ElementAtAsync(5);
+            var yyyy0 = await query.AsQuerySqlServer().ElementAtOrDefaultAsync(5);
+            var uuuu0 = await query.AsQuerySqlServer().MinAsync(x => x.Price);
+            var cccc0 = await query.AsQuerySqlServer().MinByAsync(x => x.Price);
+            var oooo0 = await query.AsQuerySqlServer().MaxAsync(x => x.Price);
+            var pppp0 = await query.AsQuerySqlServer().MaxByAsync(x => x.Price);
+            var llll0 = await query.AsQuerySqlServer().SumAsync(x => x.Price);
+            var zzzz0 = await query.AsQuerySqlServer().AverageAsync(x => x.Price);
+            var aaaa0 = await query.AsQuerySqlServer().CountAsync();
+            var ssss0 = await query.AsQuerySqlServer().CountAsync(x => x.Price < 600);
+            var dddd0 = await query.AsQuerySqlServer().AnyAsync();
+            var ffff0 = await query.AsQuerySqlServer().AnyAsync(x => x.Price < 600);
+            var gggg0 = await query.AsQuerySqlServer().SkipAsync(20);
+            var hhhh0 = await query.AsQuerySqlServer().TakeAsync(20);
+            var xxxx0 = await query.AsQuerySqlServer().SkipAndTakeAsync(10, 20);
+            var kkkk0 = await query.AsQuerySqlServer().ToListAsync();
+
+            #endregion
+
+            #endregion
+
+            #region SqlServer Commands
+
+            #region Sync
+
+            var insertr = Command
+                .Insert(new Product
+                {
+                    ProductName = "One item insert test",
+                    Price = 1234,
+                    CategoryId = 234
+                })
+                .AsCommandSqlServer()
+                .Save();
+
+            var insertrMulti = Command
+                .InsertRange(products)
+                .AsCommandSqlServer()
+                .Save();
+
+            var updater = Command
+                .Update(new Product
+                {
+                    ProductName = "222 TEST DENEME 22",
+                    Price = 6134,
+                    CategoryId = 155
+                }, x => x.Id == 102)
+                .AsCommandSqlServer()
+                .Save();
+
+            var deleter = Command
+                .Delete<Product>(x => x.Id == 102)
+                .AsCommandSqlServer()
+                .Save();
+
+            #endregion
+
+            #region Async
+
+            var insertr0 = await Command
+                .Insert(new Product
+                {
+                    ProductName = "One item insert test",
+                    Price = 1234,
+                    CategoryId = 234
+                })
+                .AsCommandSqlServer()
+                .SaveAsync();
+
+            var insertrMulti0 = await Command
+                .InsertRange(products)
+                .AsCommandSqlServer()
+                .SaveAsync();
+
+            var updater0 = await Command
+                .Update(new Product
+                {
+                    ProductName = "222 TEST DENEME 22",
+                    Price = 6134,
+                    CategoryId = 155
+                }, x => x.Id == 102)
+                .AsCommandSqlServer()
+                .SaveAsync();
+
+            var deleter0 = await Command
+                .Delete<Product>(x => x.Id == 102)
+                .AsCommandSqlServer()
+                .SaveAsync();
+
+            #endregion
+
+            #endregion
+
             return View();
         }
     }
 }
 ```
-In this code, methods to generate SQL are provided to us via the 'queryGenerate' object. `SqlInsertRange` function takes List as parameter. As a result, the SQL query is returned.
-
-`GetQuery<TEntity>` method helps for listing. As the first parameter, you can write your **WHERE** condition with a lambda expression. As the second parameter, the **Order** operation, that is, the sorting criterion, is determined (lambda is selected with an expression.) and **ASC** is handled by default. If you want to perform the reverse operation, you can give `OrderedType` as the third parameter.
-#
-**All written SQL queries are sent to the database with the `SendQuery<TEntity, TResult>(string query)` method of the `_dbCenter` object. `TEntity` here represents the Model to be processed and `TResult` represents the value to be returned.**
