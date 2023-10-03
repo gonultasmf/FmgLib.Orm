@@ -72,6 +72,7 @@ To benefit from these attributes, you will need to download the **`FmgLib.Orm.Co
 
 Let's take an example code:
 ```csharp
+using FmgLib.Develop;
 using FmgLib.Orm.DbHelper;
 using FmgLib.Orm.DbHelper.PostgreSql;
 using FmgLib.TestWeb.Models;
@@ -81,41 +82,159 @@ namespace FmgLib.TestWeb.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly IDbCenter _dbCenter;
-
-        public HomeController(IDbCenter dbCenter)
+        public HomeController()
         {
-            _dbCenter = dbCenter;
         }
 
         public IActionResult Index()
         {
-            var queryGenerate = new SqlQueryGenerate();
             List<Product> products = new List<Product>();
-            for (int i = 1; i <= 100; i++)
+            for (int i = 1; i <= 50; i++)
             {
-                var product = new Product
+                var item = new Product
                 {
                     ProductName = $"Deneme Test {i * 4}",
                     Price = i * 8,
                     CategoryId = i,
                 };
 
-                products.Add(product);
+                products.Add(item);
             }
 
-            var postgresqlinsert = queryGenerate.SqlInsertRange(products); // Insert Range Operation
-            var resultInsertSS = _dbCenter.SendQuery<Product, int>(postgresqlinsert); // Send SQL Query
+            var query = Query.GetQuery<Product>()
+                .Where(x => x.Price > 250 && x.ProductName.Contains("Dene"))
+                .DistinctBy(x => x.Price)
+                .DistinctBy(x => x.ProductName)
+                .OrderByDescending(x => x.Price);
 
-            var queryString = queryGenerate.GetQuery<Product>(x => x.Price >= 200, x => x.Price, Orm.Common.OrderedType.Desc);
-            var result = _dbCenter.SendQuery<Product, List<Product>>(queryString);
+            #region PostgreSql Queries
+
+            #region Sync
+
+            var qqqq = query.AsQueryPostgreSql().First();
+            var wwww = query.AsQueryPostgreSql().First(x => x.Id > 10);
+            var eeee = query.AsQueryPostgreSql().FirstOrDefault();
+            var rrrr = query.AsQueryPostgreSql().FirstOrDefault(x => x.Id > 10);
+            var tttt = query.AsQueryPostgreSql().ElementAt(5);
+            var yyyy = query.AsQueryPostgreSql().ElementAtOrDefault(5);
+            var uuuu = query.AsQueryPostgreSql().Min(x => x.Price);
+            var cccc = query.AsQueryPostgreSql().MinBy(x => x.Price);
+            var oooo = query.AsQueryPostgreSql().Max(x => x.Price);
+            var pppp = query.AsQueryPostgreSql().MaxBy(x => x.Price);
+            var llll = query.AsQueryPostgreSql().Sum(x => x.Price);
+            var zzzz = query.AsQueryPostgreSql().Average(x => x.Price);
+            var aaaa = query.AsQueryPostgreSql().Count();
+            var ssss = query.AsQueryPostgreSql().Count(x => x.Price < 600);
+            var dddd = query.AsQueryPostgreSql().Any();
+            var ffff = query.AsQueryPostgreSql().Any(x => x.Price < 600);
+            var gggg = query.AsQueryPostgreSql().Skip(20);
+            var hhhh = query.AsQueryPostgreSql().Take(20);
+            var xxxx = query.AsQueryPostgreSql().SkipAndTake(10, 20);
+            var kkkk = query.AsQueryPostgreSql().ToList();
+
+            #endregion
+
+            #region Async
+
+            var qqqq0 = await query.AsQueryPostgreSql().FirstAsync();
+            var wwww0 = await query.AsQueryPostgreSql().FirstAsync(x => x.Id > 10);
+            var eeee0 = await query.AsQueryPostgreSql().FirstOrDefaultAsync();
+            var rrrr0 = await query.AsQueryPostgreSql().FirstOrDefaultAsync(x => x.Id > 10);
+            var tttt0 = await query.AsQueryPostgreSql().ElementAtAsync(5);
+            var yyyy0 = await query.AsQueryPostgreSql().ElementAtOrDefaultAsync(5);
+            var uuuu0 = await query.AsQueryPostgreSql().MinAsync(x => x.Price);
+            var cccc0 = await query.AsQueryPostgreSql().MinByAsync(x => x.Price);
+            var oooo0 = await query.AsQueryPostgreSql().MaxAsync(x => x.Price);
+            var pppp0 = await query.AsQueryPostgreSql().MaxByAsync(x => x.Price);
+            var llll0 = await query.AsQueryPostgreSql().SumAsync(x => x.Price);
+            var zzzz0 = await query.AsQueryPostgreSql().AverageAsync(x => x.Price);
+            var aaaa0 = await query.AsQueryPostgreSql().CountAsync();
+            var ssss0 = await query.AsQueryPostgreSql().CountAsync(x => x.Price < 600);
+            var dddd0 = await query.AsQueryPostgreSql().AnyAsync();
+            var ffff0 = await query.AsQueryPostgreSql().AnyAsync(x => x.Price < 600);
+            var gggg0 = await query.AsQueryPostgreSql().SkipAsync(20);
+            var hhhh0 = await query.AsQueryPostgreSql().TakeAsync(20);
+            var xxxx0 = await query.AsQueryPostgreSql().SkipAndTakeAsync(10, 20);
+            var kkkk0 = await query.AsQueryPostgreSql().ToListAsync();
+
+            #endregion
+
+            #endregion
+
+            #region PostgreSql Commands
+
+            #region Sync
+
+            var insertr = Command
+                .Insert(new Product
+                {
+                    ProductName = "One item insert test",
+                    Price = 1234,
+                    CategoryId = 234
+                })
+                .AsCommandPostgreSql()
+                .Save();
+
+            var insertrMulti = Command
+                .InsertRange(products)
+                .AsCommandPostgreSql()
+                .Save();
+
+            var updater = Command
+                .Update(new Product
+                {
+                    ProductName = "222 TEST DENEME 22",
+                    Price = 6134,
+                    CategoryId = 155
+                }, x => x.Id == 102)
+                .AsCommandPostgreSql()
+                .Save();
+
+            var deleter = Command
+                .Delete<Product>(x => x.Id == 102)
+                .AsCommandPostgreSql()
+                .Save();
+
+            #endregion
+
+            #region Async
+
+            var insertr0 = await Command
+                .Insert(new Product
+                {
+                    ProductName = "One item insert test",
+                    Price = 1234,
+                    CategoryId = 234
+                })
+                .AsCommandPostgreSql()
+                .SaveAsync();
+
+            var insertrMulti0 = await Command
+                .InsertRange(products)
+                .AsCommandPostgreSql()
+                .SaveAsync();
+
+            var updater0 = await Command
+                .Update(new Product
+                {
+                    ProductName = "222 TEST DENEME 22",
+                    Price = 6134,
+                    CategoryId = 155
+                }, x => x.Id == 102)
+                .AsCommandPostgreSql()
+                .SaveAsync();
+
+            var deleter0 = await Command
+                .Delete<Product>(x => x.Id == 102)
+                .AsCommandPostgreSql()
+                .SaveAsync();
+
+            #endregion
+
+            #endregion
+
             return View();
         }
     }
 }
 ```
-In this code, methods to generate SQL are provided to us via the 'queryGenerate' object. `SqlInsertRange` function takes List as parameter. As a result, the SQL query is returned.
-
-`GetQuery<TEntity>` method helps for listing. As the first parameter, you can write your **WHERE** condition with a lambda expression. As the second parameter, the **Order** operation, that is, the sorting criterion, is determined (lambda is selected with an expression.) and **ASC** is handled by default. If you want to perform the reverse operation, you can give `OrderedType` as the third parameter.
-#
-**All written SQL queries are sent to the database with the `SendQuery<TEntity, TResult>(string query)` method of the `_dbCenter` object. `TEntity` here represents the Model to be processed and `TResult` represents the value to be returned.**
