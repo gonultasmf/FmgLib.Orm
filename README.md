@@ -3,14 +3,20 @@
 
 DbHelper is a micro ORM library for .NET. It supports various database types such as MySql, PostgreSql, Oracle, SqlServer, SQLite. It provides support for database creation using the First Code approach, but this is only valid for Oracle databases. DbHelper provides multiple database support, allowing you to easily apply the same query structure to different database types.
 
-You can access the [FmgLib.Orm.DbHelper](https://www.nuget.org/packages?q=FmgLib.Orm) NuGet package through the link.
+You can access the [FmgLib.Orm.DbHelper](https://www.nuget.org/packages/FmgLib.Orm.DbHelper) NuGet package through the link.
 
 To include the DbHelper library in your project, you need to download the relevant library from NuGet for the database you will be working with. For example:
-`FmgLib.Orm.DbHelper.MySql`,
-`FmgLib.Orm.DbHelper.PostgreSql`,
-`FmgLib.Orm.DbHelper.SqlServer`,
-`FmgLib.Orm.DbHelper.SQLite`,
-`FmgLib.Orm.DbHelper.Oracle`
+
+[`FmgLib.Orm.DbHelper.MySql`](https://www.nuget.org/packages/FmgLib.Orm.DbHelper.MySql),
+
+[`FmgLib.Orm.DbHelper.PostgreSql`](https://www.nuget.org/packages/FmgLib.Orm.DbHelper.PostgreSql),
+
+[`FmgLib.Orm.DbHelper.SqlServer`](https://www.nuget.org/packages/FmgLib.Orm.DbHelper.SqlServer),
+
+[`FmgLib.Orm.DbHelper.SQLite`](https://www.nuget.org/packages/FmgLib.Orm.DbHelper.SQLite),
+
+[`FmgLib.Orm.DbHelper.Oracle`](https://www.nuget.org/packages/FmgLib.Orm.DbHelper.Oracle)
+
 You can include the latest version of the library in your project by downloading the appropriate one.
 
 First, let's create a model for the table on the database side (regardless of the First Code approach):
@@ -37,7 +43,7 @@ public class Product : IDbEntity
 ```
 Here are some details:
 -  You can specify a custom name for the table to be created on the database side by using the `Table("TABLE_NAME")` attribute on the class. If not provided, the default name will be the class name.
--  You can customize the table on the property level using the `Column([bool IsNotNull = false], [bool IsPrimaryKey = false], [bool IsAutoIncrement = false])` attribute. **IsNotNull** controls the nullable property, and properties like **Primary Key** and **Auto-Increment** are controlled by this attribute. You don't need to use the `Column()` attribute specifically to check if a column is nullable. You can make a column nullable by adding the **?** character after the value type. 
+-  You can customize the table on the property level using the `Column([bool IsNotNull = false], [bool IsPrimaryKey = false], [bool IsAutoIncrement = false])` attribute. **IsNotNull** controls the nullable property, and properties like primary key and auto-increment are controlled by this attribute. You don't need to use the `Column()` attribute specifically to check if a column is nullable. You can make a column nullable by adding the **?** character after the value type. 
 -  The **most important thing** here is that the model must derive from the **`IDbEntity`** type; otherwise, the model will not be created on the database side.
 
 Now, let's integrate the library into your project. To do this, you need to make the necessary integrations in the `Program.cs` file:
