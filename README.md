@@ -37,7 +37,7 @@ public class Product : IDbEntity
 ```
 Here are some details:
 -  You can specify a custom name for the table to be created on the database side by using the `Table("TABLE_NAME")` attribute on the class. If not provided, the default name will be the class name.
--  You can customize the table on the property level using the `Column([bool IsNotNull = false], [bool IsPrimaryKey = false], [bool IsAutoIncrement = false])` attribute. **IsNotNull** controls the nullable property, and properties like primary key and auto-increment are controlled by this attribute. You don't need to use the `Column()` attribute specifically to check if a column is nullable. You can make a column nullable by adding the **?** character after the value type. 
+-  You can customize the table on the property level using the `Column([bool IsNotNull = false], [bool IsPrimaryKey = false], [bool IsAutoIncrement = false])` attribute. **IsNotNull** controls the nullable property, and properties like **Primary Key** and **Auto-Increment** are controlled by this attribute. You don't need to use the `Column()` attribute specifically to check if a column is nullable. You can make a column nullable by adding the **?** character after the value type. 
 -  The **most important thing** here is that the model must derive from the **`IDbEntity`** type; otherwise, the model will not be created on the database side.
 
 Now, let's integrate the library into your project. To do this, you need to make the necessary integrations in the `Program.cs` file:
